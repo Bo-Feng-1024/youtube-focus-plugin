@@ -1,0 +1,42 @@
+/*
+ * Elements are hidden only when <html> carries the .yt-focus-on class.
+ * That way content.js can toggle focus mode just by adding/removing the class.
+ *
+ * Selectors fall into two groups:
+ *   1) Structurally stable native elements — hidden here directly by tag/id.
+ *   2) Locale-dependent or third-party-injected elements (PocketTube)
+ *      — tagged by content.js with [data-ytfocus-hide] and hidden at the bottom.
+ *
+ * If something stops being hidden, YouTube most likely changed its DOM;
+ * fix/add the selector here first.
+ */
+
+/* —— Top-left YouTube logo —— */
+html.yt-focus-on ytd-topbar-logo-renderer,
+html.yt-focus-on ytd-masthead #logo {
+  visibility: hidden !important;
+}
+
+/* —— Top search bar (incl. voice-search button) —— */
+html.yt-focus-on ytd-masthead #center,
+html.yt-focus-on ytd-searchbox,
+html.yt-focus-on #voice-search-button,
+html.yt-focus-on ytd-masthead #search-form {
+  display: none !important;
+}
+
+/* —— Notifications bell —— */
+html.yt-focus-on ytd-notification-topbar-button-renderer {
+  display: none !important;
+}
+
+/* —— User avatar —— */
+html.yt-focus-on ytd-masthead #avatar-btn,
+html.yt-focus-on ytd-masthead #avatar-btn img {
+  display: none !important;
+}
+
+/* —— JS-tagged elements: Create button, PocketTube-injected Tags —— */
+html.yt-focus-on [data-ytfocus-hide] {
+  display: none !important;
+}
