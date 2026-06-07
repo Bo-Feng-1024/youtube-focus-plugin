@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Focus",
+  "version": "0.1.0",
+  "description": "Hide distracting elements in YouTube's top bar (logo, search, Create, notifications, avatar, PocketTube Tags). Toggle with a shortcut.",
+  "permissions": ["storage"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["src/content.js"],
+      "css": ["src/hide.css"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "commands": {
+    "toggle-focus": {
+      "suggested_key": {
+        "default": "Alt+Shift+F",
+        "mac": "Alt+Shift+F"
+      },
+      "description": "Toggle focus mode (hide/restore distracting top-bar elements)"
+    }
+  },
+  "action": {
+    "default_title": "YouTube Focus — click or press Alt+Shift+F to toggle"
+  }
+}
