@@ -1,0 +1,42 @@
+# YouTube Focus
+
+A lightweight Chrome extension that hides distracting elements in YouTube's top
+bar and brings them back with a single shortcut. More restrained than Unhook —
+it only touches the elements you asked for, nothing else.
+
+## Hides
+
+- Top-left YouTube logo
+- Top search bar (incl. voice-search button)
+- Create button
+- Notifications bell
+- User avatar
+- The **Tags** button injected by the PocketTube extension
+
+## Keeps
+
+Video title, the Save/etc. action buttons, channel (YouTuber) name.
+
+## Usage
+
+- Default shortcut **Alt+Shift+F** (on Mac, Alt = Option), or click the toolbar
+  icon, to toggle.
+- State is remembered: it persists across tabs and browser restarts, restoring
+  whatever the last on/off state was.
+
+## Install (developer mode, no build step)
+
+1. Open `chrome://extensions` and turn on "Developer mode" (top right).
+2. Click "Load unpacked" and select this folder.
+3. Open YouTube and press `Alt+Shift+F`.
+4. To rebind the shortcut: `chrome://extensions/shortcuts`.
+
+## After editing the code
+
+Click the ↻ reload button on the extension card, then refresh the YouTube tab.
+
+## An element isn't hidden?
+
+YouTube most likely changed its DOM. Adjust the selector in `src/hide.css`
+first. If it's the PocketTube Tags button that isn't being hidden, right-click
+and inspect it, then share its class — it can be swapped for a precise selector.
