@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Dependencies / build output
+node_modules/
+dist/
+build/
+
+# Editor / temp files
+*.tmp
+*.swp
+.idea/
+.vscode/
