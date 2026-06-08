@@ -11,6 +11,12 @@
  * fix/add the selector here first.
  */
 
+/* —— Top-left hamburger / guide (menu) button —— */
+html.yt-focus-on ytd-masthead #guide-button,
+html.yt-focus-on #guide-button {
+  display: none !important;
+}
+
 /* —— Top-left YouTube logo —— */
 html.yt-focus-on ytd-topbar-logo-renderer,
 html.yt-focus-on ytd-masthead #logo {
@@ -36,7 +42,12 @@ html.yt-focus-on ytd-masthead #avatar-btn img {
   display: none !important;
 }
 
-/* —— JS-tagged elements: Create button, PocketTube-injected Tags —— */
+/* —— PocketTube-injected Tags button (its wrapper carries class .ysm-tags) —— */
+html.yt-focus-on .ysm-tags {
+  display: none !important;
+}
+
+/* —— JS-tagged element: the locale-dependent Create button —— */
 html.yt-focus-on [data-ytfocus-hide] {
   display: none !important;
 }
