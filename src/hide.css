@@ -112,8 +112,11 @@ html.yt-focus-on.ytfocus-desc-on ytd-watch-metadata #description {
 #ytfocus-desc-toggle {
   display: inline-flex;
   align-items: center;
+  /* #bottom-row is a flex row that centers its items; pin the button to the top
+     so it stays at the start of the description however long the text is. */
+  align-self: flex-start;
   gap: 8px;
-  margin: 8px 0 12px;
+  margin: 2px 0 12px;
   padding: 8px 14px;
   font-family: 'Roboto', 'Arial', sans-serif;
   font-size: 1.4rem;
