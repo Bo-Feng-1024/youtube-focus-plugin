@@ -9,6 +9,8 @@ Hiding applies **only on the watch page** (`youtube.com/watch`). Browse pages
 
 ## Hides
 
+Top bar:
+
 - Menu (hamburger) button, top-left
 - Top-left YouTube logo
 - Top search bar (incl. voice-search button)
@@ -17,9 +19,22 @@ Hiding applies **only on the watch page** (`youtube.com/watch`). Browse pages
 - User avatar
 - The **Tags** button injected by the PocketTube extension
 
+Below the video:
+
+- Channel owner block (avatar, channel name, subscriber count)
+- Subscribe button
+- The **Add to group** button injected by the PocketTube extension
+- The whole action row (Like, Dislike, Share, Ask, Save, More)
+- The right-hand recommended/related sidebar (incl. live chat)
+- Comments
+
+The video description is **collapsed by default**; a small "Show description"
+button (injected under the title) expands it. That open/closed state is
+remembered across videos and tabs, just like focus mode.
+
 ## Keeps
 
-Video title, the Save/etc. action buttons, channel (YouTuber) name.
+Video title (and the description, one click away).
 
 ## Usage
 
