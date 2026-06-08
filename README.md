@@ -4,8 +4,12 @@ A lightweight Chrome extension that hides distracting elements in YouTube's top
 bar and brings them back with a single shortcut. More restrained than Unhook —
 it only touches the elements you asked for, nothing else.
 
+Hiding applies **only on the watch page** (`youtube.com/watch`). Browse pages
+(home, search, channel, subscriptions, …) are left completely untouched.
+
 ## Hides
 
+- Menu (hamburger) button, top-left
 - Top-left YouTube logo
 - Top search bar (incl. voice-search button)
 - Create button
