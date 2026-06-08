@@ -28,9 +28,13 @@ Below the video:
 - The right-hand recommended/related sidebar (incl. live chat)
 - Comments
 
+The video description is **collapsed by default**; a small "Show description"
+button (injected under the title) expands it. That open/closed state is
+remembered across videos and tabs, just like focus mode.
+
 ## Keeps
 
-Video title.
+Video title (and the description, one click away).
 
 ## Usage
 
