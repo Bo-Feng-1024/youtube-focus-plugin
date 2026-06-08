@@ -51,3 +51,40 @@ html.yt-focus-on .ysm-tags {
 html.yt-focus-on [data-ytfocus-hide] {
   display: none !important;
 }
+
+/* ================================================================== *
+ * Watch-page body. Only applies on /watch (the class is gated there).
+ * Strips everything under the player except the title and channel name.
+ * ================================================================== */
+
+/* —— Subscribe button (the channel name beside it is kept) —— */
+html.yt-focus-on ytd-watch-metadata #subscribe-button,
+html.yt-focus-on ytd-watch-metadata ytd-subscribe-button-renderer {
+  display: none !important;
+}
+
+/* —— PocketTube-injected "Add to group" button next to subscribe —— */
+html.yt-focus-on .add-to-collection-button-new {
+  display: none !important;
+}
+
+/* —— Action row: Like / Dislike / Share / Ask / Save / More / Clip /
+      Download. The whole container is hidden in one shot. —— */
+html.yt-focus-on ytd-watch-metadata #actions,
+html.yt-focus-on ytd-watch-metadata #actions-inner {
+  display: none !important;
+}
+
+/* —— Right-hand recommended / related sidebar (also live-chat &
+      playlist panels, which live inside #secondary) —— */
+html.yt-focus-on #secondary,
+html.yt-focus-on #secondary-inner,
+html.yt-focus-on ytd-watch-next-secondary-results-renderer {
+  display: none !important;
+}
+
+/* —— Comments —— */
+html.yt-focus-on ytd-comments#comments,
+html.yt-focus-on #comments {
+  display: none !important;
+}
