@@ -92,6 +92,9 @@ function setDescState(on) {
   }
   render();
   updateDescBtn();
+  // Showing the description should reveal the full text in one click, so also
+  // expand YouTube's own inline expander (which still starts collapsed).
+  if (on) expandNativeDescriptionSoon();
 }
 
 // Toggle initiated by this tab: update the source of truth ->
@@ -153,6 +156,9 @@ function onNavigate() {
   render();
   scanMasthead();
   ensureDescToggleSoon();
+  // A new video's inline expander starts collapsed; if the description is meant
+  // to be open, expand it fully again.
+  if (descOpen) expandNativeDescriptionSoon();
 }
 window.addEventListener('yt-navigate-finish', onNavigate);
 window.addEventListener('popstate', onNavigate);
@@ -282,6 +288,31 @@ function ensureDescToggleSoon() {
       document.getElementById(DESC_BTN_ID) || !(focusOn && isWatchPage());
     if (done || tries++ > 40) return;
     descToggleTimer = setTimeout(attempt, 150); // up to ~6s
+  })();
+}
+
+// Expand YouTube's own inline description expander so the full text shows in a
+// single click. #expand (the native "...more" button) carries a locale-neutral
+// id and is `hidden` once the description is already expanded, so clicking it
+// only when visible is idempotent.
+function expandNativeDescription() {
+  const meta = document.querySelector('ytd-watch-metadata');
+  const expand = meta && meta.querySelector('#description #expand');
+  if (!expand) return false; // expander not rendered yet — keep retrying
+  if (!expand.hidden) expand.click();
+  return true; // settled (expanded now, or nothing to expand)
+}
+
+// The expander renders a moment after navigation, so retry briefly until it's
+// expanded (or the description is no longer meant to be open).
+let descExpandTimer = null;
+function expandNativeDescriptionSoon() {
+  clearTimeout(descExpandTimer);
+  let tries = 0;
+  (function attempt() {
+    if (!(focusOn && isWatchPage() && descOpen)) return;
+    if (expandNativeDescription() || tries++ > 40) return;
+    descExpandTimer = setTimeout(attempt, 150); // up to ~6s
   })();
 }
 
