@@ -9,6 +9,8 @@ Hiding applies **only on the watch page** (`youtube.com/watch`). Browse pages
 
 ## Hides
 
+Top bar:
+
 - Menu (hamburger) button, top-left
 - Top-left YouTube logo
 - Top search bar (incl. voice-search button)
@@ -17,9 +19,17 @@ Hiding applies **only on the watch page** (`youtube.com/watch`). Browse pages
 - User avatar
 - The **Tags** button injected by the PocketTube extension
 
+Below the video:
+
+- Subscribe button
+- The **Add to group** button injected by the PocketTube extension
+- The whole action row (Like, Dislike, Share, Ask, Save, More)
+- The right-hand recommended/related sidebar (incl. live chat)
+- Comments
+
 ## Keeps
 
-Video title, the Save/etc. action buttons, channel (YouTuber) name.
+Video title and channel (YouTuber) name.
 
 ## Usage
 
