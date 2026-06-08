@@ -11,13 +11,24 @@
  *      can hide it. (PocketTube's "Tags" has a stable wrapper class .ysm-tags
  *      and is hidden purely in CSS — no JS needed.)
  *   3. Handle the toggle (shortcut / icon click) and sync state across tabs.
+ *   4. Inject a button that shows/hides the video description (collapsed by
+ *      default in focus mode); its open/closed state is remembered like focus.
  */
 
 const FOCUS_CLASS = 'yt-focus-on'; // toggle class on <html>
 const LS_KEY = 'ytFocusOn';        // localStorage mirror ('1' / '0')
 const STORE_KEY = 'focusOn';       // chrome.storage.local source of truth (boolean)
 
+// Description toggle: a second, independent on/off remembered the same way as
+// focus mode. When focus is on, the description box is collapsed by default and
+// an injected button flips .ytfocus-desc-on to reveal it.
+const DESC_CLASS = 'ytfocus-desc-on'; // toggle class on <html>
+const LS_DESC = 'ytFocusDescOn';      // localStorage mirror ('1' / '0')
+const STORE_DESC = 'descOn';          // chrome.storage.local source of truth (boolean)
+const DESC_BTN_ID = 'ytfocus-desc-toggle'; // id of the injected button
+
 let focusOn = false;
+let descOpen = false;
 
 function isWatchPage() {
   return location.pathname === '/watch';
@@ -29,18 +40,22 @@ function isWatchPage() {
 // focusOn AND we're on /watch.
 function render() {
   document.documentElement.classList.toggle(FOCUS_CLASS, focusOn && isWatchPage());
+  // The description-open class only has a visible effect combined with the
+  // focus class (see hide.css), so it's safe to mirror descOpen unconditionally.
+  document.documentElement.classList.toggle(DESC_CLASS, descOpen);
 }
 
 // —— 1a. Apply the local mirror instantly, zero flash ——
 try {
   focusOn = localStorage.getItem(LS_KEY) === '1';
+  descOpen = localStorage.getItem(LS_DESC) === '1';
 } catch (e) {
   /* localStorage may be unavailable in some contexts; fall back to false */
 }
 render();
 
 // —— 1b. Reconcile with chrome.storage (consistent across tabs) ——
-chrome.storage.local.get(STORE_KEY, (res) => {
+chrome.storage.local.get([STORE_KEY, STORE_DESC], (res) => {
   const stored = res[STORE_KEY];
   if (typeof stored === 'boolean') {
     setLocalState(stored);
@@ -48,6 +63,11 @@ chrome.storage.local.get(STORE_KEY, (res) => {
     // First run: write the current state into the source of truth
     chrome.storage.local.set({ [STORE_KEY]: focusOn });
   }
+
+  const storedDesc = res[STORE_DESC];
+  if (typeof storedDesc === 'boolean') setDescState(storedDesc);
+  // No first-run write for descOpen: its default (collapsed) is fine and it
+  // gets persisted the first time the user clicks the toggle.
 });
 
 function setLocalState(on) {
@@ -58,6 +78,20 @@ function setLocalState(on) {
     /* ignore */
   }
   render();
+  // Turning focus on (while on /watch) needs the description button injected;
+  // turning it off removes it. ensureDescToggle handles both.
+  ensureDescToggleSoon();
+}
+
+function setDescState(on) {
+  descOpen = on;
+  try {
+    localStorage.setItem(LS_DESC, on ? '1' : '0');
+  } catch (e) {
+    /* ignore */
+  }
+  render();
+  updateDescBtn();
 }
 
 // Toggle initiated by this tab: update the source of truth ->
@@ -68,6 +102,13 @@ function toggleFocus() {
   chrome.storage.local.set({ [STORE_KEY]: next });
 }
 
+// Show/hide the description; remembered across videos and tabs like focus mode.
+function toggleDesc() {
+  const next = !descOpen;
+  setDescState(next);
+  chrome.storage.local.set({ [STORE_DESC]: next });
+}
+
 // —— 3. Toggle message from background (shortcut / icon click) ——
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg && msg.type === 'toggle-focus') toggleFocus();
@@ -75,9 +116,15 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 // —— 3b. Cross-tab sync ——
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== 'local' || !changes[STORE_KEY]) return;
-  const on = changes[STORE_KEY].newValue;
-  if (on !== focusOn) setLocalState(on);
+  if (area !== 'local') return;
+  if (changes[STORE_KEY]) {
+    const on = changes[STORE_KEY].newValue;
+    if (on !== focusOn) setLocalState(on);
+  }
+  if (changes[STORE_DESC]) {
+    const on = changes[STORE_DESC].newValue;
+    if (on !== descOpen) setDescState(on);
+  }
 });
 
 // —— 3c. Page-level shortcut fallback (Alt+Shift+F) ——
@@ -105,6 +152,7 @@ window.addEventListener(
 function onNavigate() {
   render();
   scanMasthead();
+  ensureDescToggleSoon();
 }
 window.addEventListener('yt-navigate-finish', onNavigate);
 window.addEventListener('popstate', onNavigate);
@@ -178,3 +226,63 @@ function startObserving() {
 }
 if (document.body) startObserving();
 else document.addEventListener('DOMContentLoaded', startObserving, { once: true });
+
+/* ------------------------------------------------------------------ *
+ * Description toggle button
+ * ------------------------------------------------------------------ *
+ * In focus mode the video description box (#description in ytd-watch-metadata)
+ * is collapsed by default — hide.css hides it unless <html> also carries
+ * .ytfocus-desc-on. We inject a small button where the description would be;
+ * clicking it flips that class via toggleDesc(). The open/closed state is
+ * persisted (STORE_DESC) so it's remembered across videos, reloads and tabs.
+ */
+
+function updateDescBtn() {
+  const btn = document.getElementById(DESC_BTN_ID);
+  if (!btn) return;
+  btn.textContent = descOpen ? 'Hide description' : 'Show description';
+  btn.setAttribute('aria-expanded', descOpen ? 'true' : 'false');
+}
+
+function ensureDescToggle() {
+  // Only relevant on the watch page while focus mode is on. Otherwise drop any
+  // stale button (e.g. after toggling focus off or navigating away).
+  if (!(focusOn && isWatchPage())) {
+    const stale = document.getElementById(DESC_BTN_ID);
+    if (stale) stale.remove();
+    return;
+  }
+  if (document.getElementById(DESC_BTN_ID)) {
+    updateDescBtn();
+    return;
+  }
+  const meta = document.querySelector('ytd-watch-metadata');
+  const desc = meta && meta.querySelector('#description');
+  if (!desc) return; // metadata not ready yet — ensureDescToggleSoon() retries
+
+  const btn = document.createElement('button');
+  btn.id = DESC_BTN_ID;
+  btn.type = 'button';
+  btn.addEventListener('click', toggleDesc);
+  // Place the button right where the description sits, so it reads as an
+  // inline "expand the description" control.
+  desc.parentNode.insertBefore(btn, desc);
+  updateDescBtn();
+}
+
+// ytd-watch-metadata renders a moment after a navigation, so retry briefly
+// until the button lands (or we've left the watch page / focus is off).
+let descToggleTimer = null;
+function ensureDescToggleSoon() {
+  clearTimeout(descToggleTimer);
+  let tries = 0;
+  (function attempt() {
+    ensureDescToggle();
+    const done =
+      document.getElementById(DESC_BTN_ID) || !(focusOn && isWatchPage());
+    if (done || tries++ > 40) return;
+    descToggleTimer = setTimeout(attempt, 150); // up to ~6s
+  })();
+}
+
+ensureDescToggleSoon();
