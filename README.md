@@ -21,6 +21,7 @@ Top bar:
 
 Below the video:
 
+- Channel owner block (avatar, channel name, subscriber count)
 - Subscribe button
 - The **Add to group** button injected by the PocketTube extension
 - The whole action row (Like, Dislike, Share, Ask, Save, More)
@@ -29,7 +30,7 @@ Below the video:
 
 ## Keeps
 
-Video title and channel (YouTuber) name.
+Video title.
 
 ## Usage
 

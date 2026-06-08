@@ -54,10 +54,15 @@ html.yt-focus-on [data-ytfocus-hide] {
 
 /* ================================================================== *
  * Watch-page body. Only applies on /watch (the class is gated there).
- * Strips everything under the player except the title and channel name.
+ * Strips everything under the player except the title.
  * ================================================================== */
 
-/* —— Subscribe button (the channel name beside it is kept) —— */
+/* —— Channel owner block: avatar, channel name, subscriber count —— */
+html.yt-focus-on ytd-watch-metadata ytd-video-owner-renderer {
+  display: none !important;
+}
+
+/* —— Subscribe button —— */
 html.yt-focus-on ytd-watch-metadata #subscribe-button,
 html.yt-focus-on ytd-watch-metadata ytd-subscribe-button-renderer {
   display: none !important;
