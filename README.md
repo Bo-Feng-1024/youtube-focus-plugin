@@ -1,5 +1,7 @@
 # YouTube Focus
 
+[简体中文](README.zh-CN.md)
+
 A lightweight Chrome extension that hides distracting elements in YouTube's top
 bar and brings them back with a single shortcut. More restrained than Unhook —
 it only touches the elements you asked for, nothing else.
@@ -29,8 +31,8 @@ Below the video:
 - Comments
 
 The video description is **collapsed by default**; a small "Show description"
-button (injected under the title) expands it. That open/closed state is
-remembered across videos and tabs, just like focus mode.
+button (injected under the title) expands it fully in one click. That open/closed
+state is remembered across videos and tabs, just like focus mode.
 
 ## Keeps
 
