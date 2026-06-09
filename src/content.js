@@ -154,6 +154,9 @@ window.addEventListener(
 // YouTube's own post-nav event; popstate covers back/forward.
 function onNavigate() {
   render();
+  // Re-attach the masthead observer if YouTube swapped the masthead node (no-op
+  // otherwise), then scan immediately for this route change.
+  attachMastheadObserver();
   scanMasthead();
   ensureDescToggleSoon();
   // A new video's inline expander starts collapsed; if the description is meant
@@ -172,10 +175,6 @@ window.addEventListener('popstate', onNavigate);
 // xinzeng), written with \u escapes so the source stays ASCII while still
 // matching a Chinese-language YouTube UI.
 const CREATE_ARIA = [/create/i, /\u521b\u5efa|\u5efa\u7acb|\u65b0\u589e/];
-
-// Becomes true once the Create button has been found & tagged, which lets the
-// startup observer disconnect (see below).
-let createTagged = false;
 
 function mark(el) {
   if (el && !el.hasAttribute('data-ytfocus-hide')) {
@@ -201,17 +200,17 @@ function scanMasthead() {
           el.closest('button') ||
           el
       );
-      createTagged = true;
     }
   });
 }
 
-// The masthead renders a moment after document_start, so we briefly watch the
-// DOM to tag the Create button when it appears — then DISCONNECT. A persistent
-// whole-document observer is expensive on a page as mutation-heavy as YouTube
-// (it caused jank during watch<->channel navigation) and isn't needed: the
-// masthead persists across SPA navigation, and onNavigate() re-tags after any
-// route change that rebuilds it. Mutation bursts are coalesced to one scan/frame.
+// Keep a PERSISTENT MutationObserver scoped to the masthead so the Create button
+// gets re-tagged whenever YouTube re-renders it — which it does on SPA navigation
+// into /watch, often after onNavigate()'s one-shot scan already ran. Scoping to
+// the masthead subtree avoids the jank of a whole-document observer (YouTube is
+// extremely mutation-heavy): the masthead changes rarely, so this is cheap.
+// Mutation bursts are coalesced to one scan per frame.
+let mastheadObserver = null;
 let scanScheduled = false;
 function scheduleScan() {
   if (scanScheduled) return;
@@ -219,16 +218,34 @@ function scheduleScan() {
   requestAnimationFrame(() => {
     scanScheduled = false;
     scanMasthead();
-    if (createTagged) observer.disconnect();
   });
 }
-const observer = new MutationObserver(scheduleScan);
-function startObserving() {
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+
+// Attach the persistent observer to the masthead element once it exists. Returns
+// true once attached. onNavigate() calls this again as a no-op safety net — and
+// to re-attach should YouTube ever swap the whole masthead node.
+function attachMastheadObserver() {
+  if (mastheadObserver) return true;
+  const masthead =
+    document.querySelector('ytd-masthead') || document.querySelector('#masthead');
+  if (!masthead) return false;
+  mastheadObserver = new MutationObserver(scheduleScan);
+  mastheadObserver.observe(masthead, { childList: true, subtree: true });
   scanMasthead();
-  if (createTagged) observer.disconnect();
-  // Safety net: never observe forever (e.g. logged-out users have no Create button).
-  else setTimeout(() => observer.disconnect(), 15000);
+  return true;
+}
+
+// The masthead renders a moment after document_start, so if it isn't there yet we
+// briefly watch the whole document only until it appears, then hand off to the
+// scoped observer above and disconnect this bootstrap watcher.
+function startObserving() {
+  if (attachMastheadObserver()) return;
+  const bootstrap = new MutationObserver(() => {
+    if (attachMastheadObserver()) bootstrap.disconnect();
+  });
+  bootstrap.observe(document.documentElement, { childList: true, subtree: true });
+  // Safety net: never observe forever (e.g. logged-out users / no masthead).
+  setTimeout(() => bootstrap.disconnect(), 15000);
 }
 if (document.body) startObserving();
 else document.addEventListener('DOMContentLoaded', startObserving, { once: true });
